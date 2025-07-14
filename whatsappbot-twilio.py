@@ -22,7 +22,7 @@ def save_user_states(states):
 
 def send_main_menu(msg):
     msg.body(
-        "¡Hola! ¿En qué te podemos ayudar hoy?\n\n"
+        "¡Hola, somos Game Army! ¿En qué te podemos ayudar hoy?\n\n"
         "1⃣ Quiero ver el catálogo\n"
         "2⃣ Quiero cotizar\n"
         "3⃣ ¿Cuál es su horario y ubicación?\n"
@@ -91,11 +91,11 @@ def whatsapp():
             msg.body("Nuestro horario es:\n🕒 Lunes a Viernes: 10am a 4pm\n🕒 Sábado: 10am a 12:30pm\n📍 San Antonio el Desmonte, Pachuca: https://maps.app.goo.gl/iKoSvcPSUZ8zFPkn9")
             state["state"] = "completed"
         elif incoming_msg == "4":
-            hora_actual = datetime.now().hour
+            hora_actual = datetime.now(zona_cdmx).hour
             if 10 <= hora_actual < 16:
                 msg.body("Claro, te atenderemos lo antes posible...")
             else:
-                msg.body("Le recordamos que nuestro horario es:\n🕒 Lunes a Viernes: 10am a 4pm\n🕒 Sábado: 10am a 12:30pm.\nTe responderemos lo antes posible cuando estemos de vuelta.")
+                msg.body("Le recordamos que nuestro horario de atención es:\n🕒 Lunes a Viernes: 10am a 4pm\n🕒 Sábado: 10am a 12:30pm.\nTe responderemos lo antes posible cuando estemos de vuelta.")
             state["state"] = "completed"
         else:
             msg.body("Puedes decirnos cómo podemos ayudarte y si quieres regresar a las opciones solo escribe la palabra 'menú'.")
