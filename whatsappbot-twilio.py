@@ -36,8 +36,8 @@ def send_menu_out_of_work(msg):
         "¡Hola! Gracias por contactar con Game Army, te comentamos que estamos fuera de horario de servicio pero puedes decirnos cómo te podemos ayudar y te responderemos lo antes posible...\n\n"
         "1⃣ Quiero ver el catálogo\n"
         "2⃣ Quiero cotizar\n"
-        "3⃣ ¿Cuál es su horario y ubicación?\n"
-        "Responde solamente con un número (1, 2, 3 o 4).\n"
+        "3⃣ ¿Cuál es su horario y ubicación?\n\n"
+        "Responde solamente con un número (1, 2 o 3).\n"
         "Si quieres regresar a las opciones, escribe la palabra 'menú'."
     )
 
