@@ -1,23 +1,49 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
-import json
+import sqlite3
 import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-STATE_FILE = "user_states.json"
-
 # === FUNCIONES AUXILIARES ===
-def load_user_states():
-    if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r") as f:
-            return json.load(f)
-    return {}
 
-def save_user_states(states):
-    with open(STATE_FILE, "w") as f:
-        json.dump(states, f)
+def init_db():
+    conn = sqlite3.connect('user_states.db')  # Conexión a la base de datos SQLite
+    c = conn.cursor()
+    
+    # Crear la tabla si no existe
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS user_states (
+        user_id TEXT PRIMARY KEY,
+        state TEXT,
+        last_active TEXT
+    )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+def get_user_state(user_id):
+    conn = sqlite3.connect('user_states.db')
+    c = conn.cursor()
+    c.execute("SELECT state, last_active FROM user_states WHERE user_id = ?", (user_id,))
+    result = c.fetchone()
+    conn.close()
+
+    if result:
+        return {"state": result[0], "last_active": result[1]}
+    return None
+
+def save_user_state(user_id, state, last_active):
+    conn = sqlite3.connect('user_states.db')
+    c = conn.cursor()
+    c.execute('''
+    INSERT OR REPLACE INTO user_states (user_id, state, last_active)
+    VALUES (?, ?, ?)
+    ''', (user_id, state, last_active))
+    conn.commit()
+    conn.close()
 
 def send_main_menu(msg):
     msg.body(
@@ -40,15 +66,14 @@ def send_menu_out_of_work(msg):
         "Si quieres regresar a las opciones, escribe la palabra 'menú'."
     )
 
-user_states = load_user_states()
+init_db()
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     incoming_msg = request.values.get("Body", "").strip().lower()
     user_id = request.values.get("From")
 
-    user_states = load_user_states()
-    state = user_states.get(user_id)
+    state = get_user_state.get(user_id)
 
     hora_actual = datetime.now().hour
 
@@ -96,9 +121,12 @@ def whatsapp():
                 msg.body("Le recordamos que nuestro horario es:\n🕒 Lunes a Viernes: 10am a 4pm\n🕒 Sábado: 10am a 12:30pm.\nTe responderemos lo antes posible cuando estemos de vuelta.")
             state["state"] = "completed"
         else:
-            msg.body("Puedes decirnos cómo podemos ayudarte y si quieres regresar a las opciones solo escribe la palabra 'menú'.")
-            state["state"] = "completed"
-            return str(resp)
+            if current_state == "awaiting_option":
+                msg.body("Por favor responde con una opción válida (1, 2, 3 o 4).")
+                state["state"] = "warned_invalid"
+            else:
+                state ["state"] = "completed"
+                return str(resp)
 
     #elif current_state == "awaiting_quote":
         #msg.body("\u00a1Gracias! En breve te enviaremos tu cotización personalizada.\nSi necesitas algo más, responde con 'hola'.")
@@ -115,10 +143,11 @@ def whatsapp():
             return str(resp)  # no responder
 
     state["last_active"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    user_states[user_id] = state
-    save_user_states(user_states)
+
+    save_user_state(user_id, state["state"], state["last_active"])
 
     return str(resp)
 
 if __name__ == "__main__":
+    init_db()  # Aseguramos que la base de datos se cree antes de iniciar el servidor
     app.run(debug=True)
