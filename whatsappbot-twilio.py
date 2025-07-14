@@ -3,6 +3,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 import json
 import os
 from datetime import datetime, timedelta
+import pytz
 
 app = Flask(__name__)
 
@@ -50,7 +51,8 @@ def whatsapp():
     user_states = load_user_states()
     state = user_states.get(user_id)
 
-    hora_actual = datetime.now().hour
+    zona_cdmx = pytz.timezone('America/Mexico_City')
+    hora_actual = datetime.now(zona_cdmx).hour
 
     resp = MessagingResponse()
     msg = resp.message()
@@ -80,7 +82,7 @@ def whatsapp():
     elif current_state == "awaiting_option":
         if incoming_msg == "1":
             msg.body("Claro, aquí está nuestro catálogo. Los precios aplican para tienda física. Quedamos pendientes...")
-            msg.media("https://drive.google.com/uc?export=download&id=1DPABOXacxJbpxstjSisoX3OXCQsvjqsr")
+            msg.media("https://drive.google.com/uc?export=download&id=19vSvYWPQ362RcJU-sJxRN9kEk3BYxtmo")
             state["state"] = "completed"
         elif incoming_msg == "2":
             msg.body("Por favor indícanos:\n- Tipo de prenda\n- Cantidad\n- Tallas\n- Si van lisas o estampadas\nY te enviaremos tu cotización lo antes posible.")
@@ -98,7 +100,6 @@ def whatsapp():
         else:
             msg.body("Puedes decirnos cómo podemos ayudarte y si quieres regresar a las opciones solo escribe la palabra 'menú'.")
             state["state"] = "completed"
-            return str(resp)
 
     #elif current_state == "awaiting_quote":
         #msg.body("\u00a1Gracias! En breve te enviaremos tu cotización personalizada.\nSi necesitas algo más, responde con 'hola'.")
