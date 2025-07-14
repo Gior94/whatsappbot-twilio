@@ -26,7 +26,8 @@ def send_main_menu(msg):
         "2⃣ Quiero cotizar\n"
         "3⃣ ¿Cuál es su horario y ubicación?\n"
         "4⃣ Quiero hablar con alguien\n\n"
-        "Responde con el número de opción (1, 2, 3 o 4)."
+        "Responde solamente con un número (1, 2, 3 o 4)."
+        "Si quieres regresar a las opciones, escribe la palabra 'menú'"
     )
 
 def send_menu_out_of_work(msg):
@@ -35,7 +36,8 @@ def send_menu_out_of_work(msg):
         "1⃣ Quiero ver el catálogo\n"
         "2⃣ Quiero cotizar\n"
         "3⃣ ¿Cuál es su horario y ubicación?\n"
-        "Responde con el número de opción (1, 2 o 3)."
+        "Responde solamente con un número (1, 2, 3 o 4)."
+        "Si quieres regresar a las opciones, escribe la palabra 'menú'"
     )
 
 user_states = load_user_states()
@@ -106,7 +108,7 @@ def whatsapp():
         #state["state"] = "completed"
         
     elif current_state == "completed":
-        if incoming_msg == "hola":
+        if incoming_msg.lower() in ["menú", "menu"]:
             if 10 <= hora_actual < 16:
                 send_main_menu(msg)
             else:
